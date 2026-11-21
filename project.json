@@ -1,0 +1,162 @@
+{
+  "contentrating": "Everyone",
+  "description": "Ton skin Minecraft coule lentement de la surface ensoleillée jusqu'à la fosse des Mariannes : rayons de lumière, bulles, bancs de poissons, requins, méduses bioluminescentes et lampe de plongeur. Charge ton skin par fichier PNG ou par pseudo Java.",
+  "file": "index.html",
+  "general": {
+    "properties": {
+      "skinfile": {
+        "order": 1,
+        "text": "Skin Minecraft (fichier PNG)",
+        "type": "file",
+        "value": ""
+      },
+      "username": {
+        "order": 2,
+        "text": "…ou pseudo Minecraft Java (internet requis)",
+        "type": "textinput",
+        "value": ""
+      },
+      "arms": {
+        "order": 3,
+        "text": "Bras",
+        "type": "combo",
+        "value": "auto",
+        "options": [
+          { "label": "Automatique", "value": "auto" },
+          { "label": "Classique (Steve)", "value": "classic" },
+          { "label": "Fins (Alex)", "value": "slim" }
+        ]
+      },
+      "pose": {
+        "order": 4,
+        "text": "Pose",
+        "type": "combo",
+        "value": "drift",
+        "options": [
+          { "label": "Chute verticale (dérive)", "value": "drift" },
+          { "label": "Plongeon tête en bas", "value": "head" },
+          { "label": "Rotation lente", "value": "spin" },
+          { "label": "Culbute", "value": "tumble" }
+        ]
+      },
+      "palette": {
+        "order": 5,
+        "text": "Palette de l'océan",
+        "type": "combo",
+        "value": "ocean",
+        "options": [
+          { "label": "Bleu océan", "value": "ocean" },
+          { "label": "Turquoise tropical", "value": "tropic" },
+          { "label": "Vert profond", "value": "green" },
+          { "label": "Violet abyssal", "value": "violet" }
+        ]
+      },
+      "speed": {
+        "order": 6,
+        "text": "Vitesse de chute",
+        "type": "slider",
+        "value": 0.35, "min": 0.1, "max": 2, "step": 0.05
+      },
+      "sound": {
+        "order": 6.5,
+        "text": "Ambiance sonore relaxante",
+        "type": "bool",
+        "value": true
+      },
+      "volume": {
+        "order": 6.6,
+        "text": "Volume du son",
+        "type": "slider",
+        "value": 50, "min": 0, "max": 100, "step": 1
+      },
+      "offset": {
+        "order": 7,
+        "text": "Position du personnage (gauche ↔ droite)",
+        "type": "slider",
+        "value": 0, "min": -60, "max": 60, "step": 1
+      },
+      "loop": {
+        "order": 8,
+        "text": "Recommencer en boucle depuis la surface",
+        "type": "bool",
+        "value": true
+      },
+      "life": {
+        "order": 9,
+        "text": "Créatures marines (poissons, requins, méduses)",
+        "type": "bool",
+        "value": true
+      },
+      "lamp": {
+        "order": 10,
+        "text": "Lampe de plongeur dans les profondeurs",
+        "type": "bool",
+        "value": true
+      },
+      "bubbles": {
+        "order": 11,
+        "text": "Quantité de bulles",
+        "type": "slider",
+        "value": 1, "min": 0, "max": 1.5, "step": 0.05
+      },
+      "bloom": {
+        "order": 12,
+        "text": "Lueur (bloom)",
+        "type": "slider",
+        "value": 1, "min": 0, "max": 2, "step": 0.05
+      },
+      "grain": {
+        "order": 13,
+        "text": "Grain de pellicule",
+        "type": "slider",
+        "value": 0.6, "min": 0, "max": 2, "step": 0.05
+      },
+      "hud": {
+        "order": 14,
+        "text": "Afficher la profondeur",
+        "type": "bool",
+        "value": true
+      },
+      "hudpos": {
+        "order": 15,
+        "text": "Position de l'affichage",
+        "type": "combo",
+        "value": "br",
+        "options": [
+          { "label": "Bas droite", "value": "br" },
+          { "label": "Bas gauche", "value": "bl" },
+          { "label": "Haut droite", "value": "tr" },
+          { "label": "Haut gauche", "value": "tl" }
+        ]
+      },
+      "scale": {
+        "order": 16.5,
+        "text": "Résolution du rendu (%) — plus bas = plus de FPS",
+        "type": "slider",
+        "value": 100, "min": 50, "max": 100, "step": 5
+      },
+      "autoscale": {
+        "order": 16.6,
+        "text": "Ajuster la résolution automatiquement (fluidité)",
+        "type": "bool",
+        "value": true
+      },
+      "quality": {
+        "order": 16,
+        "text": "Qualité",
+        "type": "combo",
+        "value": "high",
+        "options": [
+          { "label": "Basse (PC modeste)", "value": "low" },
+          { "label": "Moyenne", "value": "med" },
+          { "label": "Haute", "value": "high" }
+        ]
+      }
+    }
+  },
+  "preview": "preview.jpg",
+  "tags": ["Game", "Nature", "Relaxing"],
+  "title": "Minecraft Abyss — Chute dans l'océan",
+  "type": "web",
+  "version": 1
+}
