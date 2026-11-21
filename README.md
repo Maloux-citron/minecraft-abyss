@@ -1,6 +1,6 @@
-<p align="center"><img src="assets/banner.jpg" alt="Minecraft Abyss : un skin Minecraft qui coule dans l'océan" width="100%"></p>
+<p align="center"><img src="assets/banner.jpg" alt="Abysse : un skin Minecraft qui coule dans l'océan" width="100%"></p>
 
-# Minecraft Abyss
+# Abysse
 
 Fond d'écran animé en 3D temps réel (WebGL / Three.js) : ton skin Minecraft coule lentement de la surface
 ensoleillée jusqu'à **10 935 m** (fosse des Mariannes), puis recommence. Compatible **Wallpaper Engine** (type « web »)
@@ -24,7 +24,7 @@ Un tuto animé en français avec sous-titres anglais (≈ 1 min 40) : téléchar
 ## Installation
 ### Wallpaper Engine
 1. Copie le dossier dans `…\steamapps\common\wallpaper_engine\projects\myprojects\`
-2. Ouvre Wallpaper Engine → **Installés** → « Minecraft Abyss » (ou *Ouvrir un fond d'écran → Depuis un fichier* → `project.json`).
+2. Ouvre Wallpaper Engine → **Installés** → « Abysse » (ou *Ouvrir un fond d'écran → Depuis un fichier* → `project.json`).
 3. Règle le skin (fichier PNG ou pseudo Java), la pose, la vitesse, la palette, la qualité, le volume…
 
 ### Navigateur

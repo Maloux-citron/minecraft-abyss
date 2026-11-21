@@ -11,7 +11,7 @@ for (const [k, f] of Object.entries(imgs)) {
 }
 fs.writeFileSync(path.join(root, 'tuto-artifact.html'), src);
 const standalone = '<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
-  src.replace('<title>Tuto Minecraft Abyss</title>', '<title>Tuto Minecraft Abyss</title>')
+  src.replace('<title>Tuto Abysse</title>', '<title>Tuto Abysse</title>')
      .replace(/<main class="wrap">/, '</head>\n<body>\n<main class="wrap">') + '\n</body>\n</html>\n';
 fs.writeFileSync(path.join(root, 'index.html'), standalone);
 console.log('ok', (fs.statSync(path.join(root, 'index.html')).size / 1024) | 0, 'Ko');

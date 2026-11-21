@@ -1,5 +1,5 @@
 /* =====================================================================
- *  MINECRAFT ABYSS — ambiance sonore relaxante (100 % synthétisée, aucun fichier audio)
+ *  ABYSSE — ambiance sonore relaxante (100 % synthétisée, aucun fichier audio)
  *  AUCUN BRUIT : uniquement des sons tonals (sinus / triangle), jamais de bruit blanc.
  *  - houle : notes graves pures qui respirent lentement, et s'assourdissent avec la profondeur
  *  - harmoniques cristallines près de la surface

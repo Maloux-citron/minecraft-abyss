@@ -1,5 +1,5 @@
 /* =====================================================================
- *  MINECRAFT ABYSS — fond d'écran animé (Three.js / WebGL)
+ *  ABYSSE — fond d'écran animé (Three.js / WebGL)
  *  Un skin Minecraft coule lentement des eaux ensoleillées jusqu'à la fosse
  *  des Mariannes. Compatible Wallpaper Engine (web) + navigateur.
  * ===================================================================== */
@@ -1270,7 +1270,10 @@ if (S.username && !IN_WE.v) loadSkinByName(S.username);
 requestAnimationFrame((t) => { lastFrame = t; frame(t); });
 
 // debug / captures
-window.__abyss = { S, st, U, player, creatures, resetCycle, loadSkinFromPath, capture(o) {
+window.__abyss = { S, st, U, player, creatures, resetCycle, loadSkinFromPath,
+  // image par image déterministe (pour filmer le fond d'écran) : fait avancer le temps de dt, place le monde à la profondeur `scroll`
+  step(dt, scroll, vel) { U.scroll.value = scroll; update(dt); U.scroll.value = scroll; U.vel.value = vel; renderPost(bloomNow); },
+  capture(o) {
     o = o || {}; update(0.016); renderPost(bloomNow);
     const sx = o.sx || 0, sy = o.sy || 0, sw = o.sw || canvas.width, sh = o.sh || canvas.height;
     const t = document.createElement('canvas'); t.width = o.w || sw; t.height = o.h || sh;

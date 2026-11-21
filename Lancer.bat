@@ -1,6 +1,6 @@
 @echo off
 rem ============================================================
-rem  Minecraft Abyss - lance le fond d'ecran en plein ecran
+rem  Abysse - lance le fond d'ecran en plein ecran
 rem  (sans Wallpaper Engine). Quitte avec Alt+F4 ou Echap.
 rem ============================================================
 setlocal
