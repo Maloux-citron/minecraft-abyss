@@ -147,12 +147,28 @@
   A.unlock = function () {
     if (A.ctx && A.ctx.state === 'suspended') A.ctx.resume().then(() => { A.needsGesture = false; }).catch(() => {});
   };
-  A.setPaused = function (p) {
+  // Coupure du son : quand Wallpaper Engine met le fond en pause (jeu en plein écran, etc.)
+  // ou quand la page est masquée. Fondu rapide puis suspension du moteur audio (0 % CPU).
+  const why = { pause: false, hidden: !!document.hidden };
+  let muted = !!document.hidden, suspendTimer = 0;
+  function applyMute() {
+    const m = why.pause || why.hidden;
+    if (m === muted) return;
+    muted = m;
+    clearTimeout(suspendTimer);
     if (!A.ctx) return;
-    if (p) A.ctx.suspend().catch(() => {}); else A.ctx.resume().catch(() => {});
-  };
+    if (m) {
+      master.gain.cancelScheduledValues(A.ctx.currentTime);
+      master.gain.setTargetAtTime(0, A.ctx.currentTime, 0.12);
+      suspendTimer = setTimeout(() => { if (muted && A.ctx) A.ctx.suspend().catch(() => {}); }, 600);
+    } else {
+      A.ctx.resume().catch(() => {});          // le volume remonte en douceur dans update()
+    }
+  }
+  A.setPaused = function (p) { why.pause = !!p; applyMute(); };
+  document.addEventListener('visibilitychange', () => { why.hidden = document.hidden; applyMute(); });
   A.update = function (dt, depth, fade) {
-    if (!A.ok) return;
+    if (!A.ok || muted) return;
     if (!built) A.start();
     if (!A.ctx) return;
     const ctx = A.ctx, t = ctx.currentTime;

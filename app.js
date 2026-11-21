@@ -1270,5 +1270,11 @@ if (S.username && !IN_WE.v) loadSkinByName(S.username);
 requestAnimationFrame((t) => { lastFrame = t; frame(t); });
 
 // debug / captures
-window.__abyss = { S, st, U, player, creatures, resetCycle, loadSkinFromPath, capture() { update(0.016); renderPost(bloomNow); const t = document.createElement('canvas'); t.width = 640; t.height = 360; t.getContext('2d').drawImage(canvas, 0, 0, 640, 360); return t.toDataURL('image/jpeg', 0.9); }, jump(d) { U.scroll.value = d / M_PER_UNIT; st.cycle = Math.max(st.cycle, 12); st.vel = BASE_V; st.fade = 1; creatures.forEach(c => respawn(c, true)); } };
+window.__abyss = { S, st, U, player, creatures, resetCycle, loadSkinFromPath, capture(o) {
+    o = o || {}; update(0.016); renderPost(bloomNow);
+    const sx = o.sx || 0, sy = o.sy || 0, sw = o.sw || canvas.width, sh = o.sh || canvas.height;
+    const t = document.createElement('canvas'); t.width = o.w || sw; t.height = o.h || sh;
+    const x = t.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(canvas, sx, sy, sw, sh, 0, 0, t.width, t.height);
+    return t.toDataURL(o.type || 'image/png');
+  }, jump(d) { U.scroll.value = d / M_PER_UNIT; st.cycle = Math.max(st.cycle, 12); st.vel = BASE_V; st.fade = 1; creatures.forEach(c => respawn(c, true)); } };
 })();
