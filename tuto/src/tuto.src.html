@@ -1,0 +1,469 @@
+<title>Tuto Minecraft Abyss</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@500;700&family=Press+Start+2P&display=swap">
+<style>
+  /* Concept : un journal de plongée. Les étapes du tuto sont une descente, le compteur de profondeur suit la lecture. */
+  :root {
+    --abyss: #031322;      /* fond */
+    --deep: #072a45;       /* surfaces */
+    --line: rgba(125, 220, 255, .22);
+    --text: #e6f6ff;
+    --muted: #93b9cf;
+    --accent: #38e1ff;     /* cyan sonar */
+    --glow: #7dffd9;       /* plancton */
+    --mark: #ffb45e;       /* repères de clic */
+    --f-display: "Sora", "Segoe UI", system-ui, sans-serif;
+    --f-body: "Inter", "Segoe UI", system-ui, sans-serif;
+    --f-pixel: "Press Start 2P", "Courier New", monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--abyss); color: var(--text); font: 400 16px/1.55 var(--f-body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 28px 56px; }
+  .wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 28px; }
+  h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  .top { display: grid; gap: 6px; }
+  .brand { font: 400 10px/1 var(--f-pixel); letter-spacing: .08em; color: var(--glow); }
+  .top h1 { font-size: clamp(26px, 4.4vw, 44px); line-height: 1.1; letter-spacing: -.01em; }
+  .top h1 span { color: var(--muted); font-weight: 500; }
+  .top p { margin: 0; color: var(--muted); }
+
+  /* ---------- lecteur ---------- */
+  .player { display: grid; gap: 10px; }
+  .stage { position: relative; background: #000; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .media { position: relative; aspect-ratio: 16 / 9; container-type: inline-size; overflow: hidden; background: var(--deep); }
+  .bg { position: absolute; inset: -4%; background-size: cover; background-position: center; opacity: 0;
+    transition: opacity .9s ease, filter .9s ease; }
+  .bg.on { opacity: 1; }
+  .bg.blur { filter: blur(7px) brightness(.62) saturate(1.1); }
+  .shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(2, 12, 24, .82) 0%, rgba(2, 12, 24, .5) 42%, rgba(2, 12, 24, 0) 70%); pointer-events: none; }
+  .hud { position: absolute; top: 3.2cqw; left: 3.6cqw; right: 3.6cqw; display: flex; justify-content: space-between; align-items: start; gap: 12px;
+    font: 400 clamp(8px, 1.2cqw, 13px)/1.4 var(--f-pixel); letter-spacing: .06em; text-shadow: 0 1px 10px rgba(0, 20, 40, .9), 0 0 2px rgba(0, 20, 40, .8); }
+  .hud #stepTag { color: var(--glow); font: 600 clamp(9px, 1.15cqw, 13px)/1.4 var(--f-body); letter-spacing: .14em; }
+  .hud #depth { color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
+  .pill { position: absolute; left: 3.6cqw; top: 8.4cqw; font: 500 clamp(10px, 1.5cqw, 15px)/1 var(--f-body); padding: .5em .9em; border: 1px solid var(--line);
+    border-radius: 99px; background: rgba(3, 19, 34, .6); backdrop-filter: blur(4px); transition: opacity .4s; }
+
+  .visual { position: absolute; right: 4cqw; top: 50%; transform: translateY(-48%); font-size: 1.32cqw; }
+  .fr { position: absolute; left: 3.6cqw; bottom: 21%; width: 46%; }
+  .fr h2 { font-size: clamp(22px, 3.4cqw, 44px); line-height: 1.08; letter-spacing: -.01em; margin-bottom: .45em; }
+  .fr p { margin: 0; font-size: clamp(14px, 1.7cqw, 20px); line-height: 1.5; color: #d3ecfa; max-width: 34em; }
+  .en { position: absolute; left: 50%; bottom: 4.2%; transform: translateX(-50%); width: min(84%, 62em); text-align: center;
+    font: 500 clamp(12px, 1.55cqw, 18px)/1.4 var(--f-body); color: #fff; }
+  .en span { display: inline; padding: .12em .5em; background: rgba(0, 0, 0, .72); -webkit-box-decoration-break: clone; box-decoration-break: clone; border-radius: 3px; }
+  .en[hidden] { display: none; }
+  .scene-in { animation: sceneIn .6s ease both; }
+  @keyframes sceneIn { from { opacity: 0; transform: translateY(8px); } }
+
+  .controls { display: flex; align-items: center; gap: 10px; }
+  .btn { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line);
+    background: var(--deep); color: var(--text); cursor: pointer; padding: 0; }
+  .btn:hover { border-color: var(--accent); }
+  .btn svg { width: 18px; height: 18px; fill: currentColor; }
+  .btn[aria-pressed="true"] { background: var(--accent); color: #002433; border-color: var(--accent); }
+  .btn.main { width: 46px; height: 46px; background: var(--accent); color: #002433; border-color: var(--accent); }
+  .seek { flex: 1; min-width: 0; display: flex; gap: 4px; align-items: center; }
+  .seg { flex: var(--w, 1); height: 22px; padding: 8px 0; background: none; border: 0; cursor: pointer; position: relative; }
+  .seg::before { content: ""; position: absolute; left: 0; right: 0; top: 8px; height: 6px; border-radius: 3px; background: rgba(125, 220, 255, .18); }
+  .seg i { position: absolute; left: 0; top: 8px; height: 6px; border-radius: 3px; width: 0; background: linear-gradient(90deg, var(--accent), var(--glow)); }
+  .seg:hover::before { background: rgba(125, 220, 255, .32); }
+  .time { flex: none; font: 400 10px/1 var(--f-pixel); color: var(--muted); font-variant-numeric: tabular-nums; min-width: 9.5em; text-align: right; }
+
+  @media (max-width: 719px) {
+    .stage { border-radius: 8px; }
+    .media { aspect-ratio: 16 / 9; }
+    .shade { background: linear-gradient(0deg, rgba(2, 12, 24, .35), rgba(2, 12, 24, 0) 60%); }
+    .visual { right: 50%; transform: translate(50%, -46%); font-size: 2.3cqw; }
+    .fr, .en { position: static; transform: none; width: auto; }
+    .fr { padding: 18px 16px 6px; background: var(--abyss); }
+    .fr h2 { font-size: 24px; } .fr p { font-size: 16px; }
+    .en { padding: 4px 16px 18px; background: var(--abyss); text-align: left; font-size: 14px; }
+    .en span { background: none; padding: 0; color: var(--muted); }
+    .pill { top: 11cqw; }
+    .time { display: none; }
+  }
+
+  /* ---------- maquettes d'interface (illustrations) ---------- */
+  .m { width: 33em; background: rgba(5, 22, 40, .88); color: #dcefff; border: 1px solid var(--line); border-radius: .9em; padding: 1.3em;
+    box-shadow: 0 1.6em 4em rgba(0, 0, 0, .5); backdrop-filter: blur(6px); font: 500 1em/1.4 var(--f-body); position: relative; }
+  .m svg { display: block; }
+  .m .mono { font-family: Consolas, "Courier New", monospace; }
+  .rise { animation: rise .7s .15s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(1.2em); } }
+  .pop { animation: pop .5s ease both; }
+  @keyframes pop { from { opacity: 0; transform: scale(.85); } }
+  .ping { animation: ping 1.4s ease-in-out infinite; }
+  @keyframes ping { 50% { box-shadow: 0 0 0 .55em rgba(255, 180, 94, 0); } 0% { box-shadow: 0 0 0 0 rgba(255, 180, 94, .75); } }
+
+  /* GitHub */
+  .gh-head { display: flex; align-items: center; gap: .6em; font-size: 1.15em; padding-bottom: .9em; border-bottom: 1px solid var(--line); }
+  .gh-head svg { width: 1.3em; height: 1.3em; fill: var(--muted); }
+  .gh-head i { font-style: normal; font-size: .72em; border: 1px solid var(--line); border-radius: 99px; padding: .1em .7em; color: var(--muted); }
+  .gh-bar { display: flex; justify-content: space-between; align-items: center; padding: 1em 0 .4em; }
+  .gh-bar .br { border: 1px solid var(--line); border-radius: .5em; padding: .45em .9em; color: var(--muted); }
+  .codewrap { position: relative; }
+  .gh-bar .code { background: #1f9d55; color: #fff; border-radius: .5em; padding: .5em 1em; font-weight: 600; display: block; }
+  .gh-menu { position: absolute; right: 0; top: 3.1em; width: 17em; background: #0b2c47; border: 1px solid var(--line); border-radius: .7em; overflow: hidden; z-index: 2;
+    box-shadow: 0 1em 2.5em rgba(0, 0, 0, .5); animation: fadeIn .4s 1.5s ease both; }
+  .gh-menu div { height: 2.4em; display: flex; align-items: center; gap: .6em; padding: 0 1em; color: var(--muted); border-bottom: 1px solid var(--line); }
+  .gh-menu div:last-child { border: 0; }
+  .gh-menu .zip { color: #fff; background: rgba(255, 180, 94, .18); box-shadow: inset 0 0 0 2px var(--mark); font-weight: 600; animation: ping 1.4s 2.2s infinite; }
+  .gh-menu svg { width: 1.1em; height: 1.1em; fill: currentColor; }
+  .gh-files { margin-top: 3.4em; display: grid; gap: .5em; color: var(--muted); font-size: .92em; }
+  .gh-files span { display: flex; gap: .6em; }
+  .cursor { position: absolute; width: 1.7em; height: 1.7em; left: 0; top: 0; z-index: 3; filter: drop-shadow(0 .15em .25em rgba(0, 0, 0, .6));
+    animation: cur 5.2s .3s ease-in-out both; }
+  @keyframes cur { 0% { transform: translate(-9em, 9em); opacity: 0; } 12% { opacity: 1; } 30%, 42% { transform: translate(2.4em, 1.4em); }
+    62%, 100% { transform: translate(-2.2em, 9.6em); opacity: 1; } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-.4em); } }
+
+  /* chemin */
+  .crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: .35em .5em; font-size: .92em; color: var(--muted); }
+  .crumbs span { border: 1px solid var(--line); border-radius: .4em; padding: .25em .6em; }
+  .crumbs span.last { color: #001c2a; background: var(--glow); border-color: var(--glow); font-weight: 600; }
+  .folder { margin-top: 1.3em; display: flex; align-items: center; gap: .9em; border: 1px dashed rgba(125, 255, 217, .5); border-radius: .8em; padding: .9em 1.1em; animation: drop 1s .5s ease both; }
+  @keyframes drop { from { transform: translateY(-5em); opacity: 0; } 60% { transform: translateY(.4em); opacity: 1; } }
+  .folder svg { width: 2.6em; height: 2.6em; fill: var(--glow); flex: none; }
+  .folder b { display: block; font-size: 1.1em; }
+  .folder .files { font-size: .82em; color: var(--muted); }
+  .ok { margin-top: .9em; display: inline-flex; align-items: center; gap: .5em; color: var(--glow); font-weight: 600; animation: pop .5s 1.8s ease both; }
+  .ok svg { width: 1.2em; height: 1.2em; fill: currentColor; }
+
+  /* Wallpaper Engine */
+  .we-tabs { display: flex; gap: .3em; border-bottom: 1px solid var(--line); margin: -.3em 0 1em; }
+  .we-tabs span { padding: .55em 1em; color: var(--muted); border-bottom: 2px solid transparent; }
+  .we-tabs span.on { color: #fff; border-color: var(--accent); }
+  .we-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8em; }
+  .tile { border-radius: .6em; overflow: hidden; border: 1px solid var(--line); background: #0a2238; }
+  .tile .ph { aspect-ratio: 16 / 9; background: linear-gradient(135deg, #12304a, #0a1f33); }
+  .tile .ph.img { background-size: cover; background-position: center; }
+  .tile small { display: block; padding: .5em .7em; font-size: .78em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile.sel { border-color: var(--mark); box-shadow: 0 0 0 2px var(--mark); animation: ping 1.4s 1s infinite, pop .6s .3s ease both; }
+  .tile.sel small { color: #fff; }
+  .note { margin-top: 1em; font-size: .85em; color: var(--muted); }
+
+  /* propriétés */
+  .props { display: grid; gap: 1.05em; }
+  .row { display: grid; gap: .4em; }
+  .row label { font-size: .85em; color: var(--muted); }
+  .ctl { border: 1px solid var(--line); border-radius: .5em; padding: .55em .9em; background: rgba(0, 12, 24, .55); display: flex; justify-content: space-between; align-items: center; }
+  .ctl.hl { border-color: var(--mark); animation: ping 1.4s infinite; }
+  .ctl b { font-weight: 500; color: var(--accent); }
+  .type { overflow: hidden; white-space: nowrap; width: 0; border-right: .12em solid var(--accent); animation: typing 1.2s 1.6s steps(5) both, caret .7s infinite; }
+  @keyframes typing { to { width: 5.2ch; } } @keyframes caret { 50% { border-color: transparent; } }
+  .props .or { text-align: center; font-size: .8em; color: var(--muted); }
+
+  /* réglages */
+  .sl { display: grid; gap: .45em; margin-bottom: 1em; }
+  .sl .lab { display: flex; justify-content: space-between; font-size: .88em; color: var(--muted); }
+  .sl .lab b { color: var(--text); font-weight: 600; }
+  .track { height: .5em; border-radius: 1em; background: rgba(125, 220, 255, .18); position: relative; }
+  .track i { position: absolute; inset: 0 auto 0 0; width: var(--v); border-radius: 1em; background: linear-gradient(90deg, var(--accent), var(--glow)); animation: grow 1.2s .4s ease both; }
+  .track i::after { content: ""; position: absolute; right: -.45em; top: 50%; width: .9em; height: .9em; margin-top: -.45em; border-radius: 50%; background: #fff; }
+  @keyframes grow { from { width: 0; } }
+  .seg3 { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: .5em; overflow: hidden; text-align: center; font-size: .88em; }
+  .seg3 span { padding: .5em 0; color: var(--muted); } .seg3 span.on { background: var(--accent); color: #002433; font-weight: 600; }
+  .chips { display: flex; gap: .6em; margin: 0 0 1em; }
+  .chips i { width: 2.6em; height: 1.5em; border-radius: .4em; border: 1px solid var(--line); }
+
+  /* jeu */
+  .game { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1.2em; }
+  .mon { aspect-ratio: 16 / 10; border: .35em solid #1b3a56; border-radius: .6em; background: #05080f; display: grid; place-items: center; position: relative; overflow: hidden; }
+  .mon b { font: 400 .8em/1.6 var(--f-pixel); color: var(--mark); text-align: center; }
+  .mon::before, .mon::after { content: ""; position: absolute; background: rgba(255, 255, 255, .25); }
+  .mon::before { left: 50%; top: 18%; bottom: 62%; width: .12em; } .mon::after { top: 50%; left: 18%; right: 62%; height: .12em; }
+  .arrow { width: 2.2em; fill: var(--accent); }
+  .wp { border: 1px solid var(--line); border-radius: .7em; padding: .9em; display: grid; gap: .6em; justify-items: center; text-align: center; font-size: .9em; }
+  .wp svg { width: 2.4em; height: 2.4em; fill: var(--glow); }
+  .wp .off { fill: var(--mark); animation: pop .5s 1.2s ease both; }
+  .wp small { color: var(--muted); }
+
+  /* bat */
+  .bat { display: grid; grid-template-columns: auto auto 1fr; gap: 1.2em; align-items: center; }
+  .file { display: grid; justify-items: center; gap: .5em; font-size: .95em; }
+  .file svg { width: 3.6em; height: 3.6em; }
+  .file .mono { color: var(--mark); font-weight: 600; }
+  .file.sel { animation: ping 1.4s infinite; border-radius: .6em; padding: .6em .8em; box-shadow: 0 0 0 2px var(--mark); }
+  .win { border: 1px solid var(--line); border-radius: .6em; overflow: hidden; background: #0a2238; }
+  .win .bar { height: 1.4em; background: #12304a; } .win .ph { aspect-ratio: 16 / 9; background-size: cover; background-position: center; }
+  .win small { display: block; padding: .4em .7em; color: var(--muted); font-size: .8em; }
+
+  /* liste texte */
+  .list h2 { font-size: clamp(20px, 3vw, 28px); margin-bottom: 16px; }
+  .list h2 span { color: var(--muted); font-weight: 500; }
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+  .steps li { background: var(--deep); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px 18px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+  .steps .tag { font: 600 11px/1.4 var(--f-body); color: var(--glow); letter-spacing: .14em; }
+  .steps h3 { font-size: 18px; }
+  .steps p { margin: 0; }
+  .steps p[lang="en"] { color: var(--muted); font-size: 14.5px; font-style: italic; }
+  footer { color: var(--muted); font-size: 14px; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 18px; }
+  footer p { margin: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .type { width: 5.2ch; } .cursor { display: none; } .gh-menu { opacity: 1; }
+  }
+</style>
+
+<main class="wrap">
+  <header class="top">
+    <span class="brand">MINECRAFT ABYSS</span>
+    <h1>Installer le fond d'écran <span lang="en">/ Setup guide</span></h1>
+    <p>Tuto en français, sous-titres en anglais. <span lang="en">Tutorial in French, with English subtitles.</span></p>
+  </header>
+
+  <section class="player" aria-label="Tuto">
+    <div class="stage" id="stage">
+      <div class="media" id="media">
+        <div class="bg" id="bgA"></div><div class="bg" id="bgB"></div>
+        <div class="shade"></div>
+        <div class="hud"><span id="stepTag">INTRO</span><span id="depth" aria-hidden="true">0 m</span></div>
+        <div class="pill" id="pill" hidden></div>
+        <div class="visual" id="visual"></div>
+      </div>
+      <div class="fr" id="fr" aria-live="polite"><h2 id="frH"></h2><p id="frP"></p></div>
+      <div class="en" id="en" lang="en"><span id="enT"></span></div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="prev" aria-label="Étape précédente"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+      <button class="btn main" id="play" aria-label="Lecture / pause"><svg viewBox="0 0 24 24" id="playIcon"><path d="M6 4l14 8-14 8z"/></svg></button>
+      <button class="btn" id="next" aria-label="Étape suivante"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5l11 7L4 19z"/></svg></button>
+      <div class="seek" id="seek" role="group" aria-label="Étapes"></div>
+      <button class="btn" id="cc" aria-pressed="true" aria-label="Sous-titres anglais"><svg viewBox="0 0 24 24"><path d="M4 5h16a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1zm4.5 9.2c.9 0 1.5-.3 2-.9l-.9-.8c-.3.3-.6.5-1 .5-.8 0-1.3-.6-1.3-1.5s.5-1.5 1.3-1.5c.4 0 .7.2 1 .5l.9-.8c-.5-.6-1.1-.9-2-.9-1.7 0-2.8 1.2-2.8 2.7s1.1 2.7 2.8 2.7zm6.6 0c.9 0 1.5-.3 2-.9l-.9-.8c-.3.3-.6.5-1 .5-.8 0-1.3-.6-1.3-1.5s.5-1.5 1.3-1.5c.4 0 .7.2 1 .5l.9-.8c-.5-.6-1.1-.9-2-.9-1.7 0-2.8 1.2-2.8 2.7s1.1 2.7 2.8 2.7z"/></svg></button>
+      <span class="time" id="time">0:00 / 1:40</span>
+    </div>
+  </section>
+
+  <section class="list" aria-label="Toutes les étapes">
+    <h2>Toutes les étapes <span lang="en">/ All steps</span></h2>
+    <ol class="steps" id="all"></ol>
+  </section>
+
+  <footer>
+    <p>Code et mises à jour : <a href="https://github.com/maelchand13-hash/minecraft-abyss" target="_blank" rel="noopener">github.com/maelchand13-hash/minecraft-abyss</a></p>
+    <p>Projet de fan non officiel, non affilié à Mojang Studios ni à Microsoft. <span lang="en">Fan-made and unofficial, not affiliated with Mojang Studios or Microsoft.</span></p>
+  </footer>
+</main>
+
+<!-- maquettes -->
+<template id="v-gh">
+  <div class="m rise">
+    <div class="gh-head"><svg viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5zm10.5-1h-8a1 1 0 00-1 1v6.708A2.486 2.486 0 014.5 9h8zM5 12.25a.25.25 0 01.25-.25h3.5a.25.25 0 01.25.25v3.25a.25.25 0 01-.4.2l-1.45-1.087a.249.249 0 00-.3 0L5.4 15.7a.25.25 0 01-.4-.2z"/></svg><span><b>maelchand13-hash</b> / <b>minecraft-abyss</b></span><i>Public</i></div>
+    <div class="gh-bar"><span class="br mono">main ▾</span>
+      <div class="codewrap"><span class="code">&lt;&gt; Code ▾</span>
+        <div class="gh-menu"><div>Clone <span class="mono">HTTPS</span></div><div>Open with GitHub Desktop</div><div class="zip"><svg viewBox="0 0 16 16"><path d="M7.25 1.75a.75.75 0 011.5 0v6.69l2.22-2.22a.75.75 0 111.06 1.06l-3.5 3.5a.75.75 0 01-1.06 0l-3.5-3.5a.75.75 0 011.06-1.06l2.22 2.22zM2.75 12a.75.75 0 000 1.5h10.5a.75.75 0 000-1.5z"/></svg>Download ZIP</div></div>
+        <svg class="cursor" viewBox="0 0 24 24"><path d="M4 2l15 9-6.5 1.6L9.8 19z" fill="#fff" stroke="#001c2a" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div class="gh-files mono"><span>app.js</span><span>ambience.js</span><span>index.html</span><span>project.json</span></div>
+  </div>
+</template>
+
+<template id="v-path">
+  <div class="m rise">
+    <div class="crumbs"><span>Steam</span>›<span>steamapps</span>›<span>common</span>›<span>wallpaper_engine</span>›<span>projects</span>›<span class="last">myprojects</span></div>
+    <div class="folder">
+      <svg viewBox="0 0 24 24"><path d="M3 5.5A1.5 1.5 0 014.5 4h4.2c.4 0 .8.2 1.1.5L11 6h8.5A1.5 1.5 0 0121 7.5v10a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 17.5z"/></svg>
+      <div><b>MinecraftAbyss</b><span class="files mono">project.json · index.html · app.js …</span></div>
+    </div>
+    <div class="ok"><svg viewBox="0 0 24 24"><path d="M9.5 16.6L5.4 12.5l-1.4 1.4 5.5 5.5L20.4 8.5 19 7.1z"/></svg><span>Copié / Copied</span></div>
+  </div>
+</template>
+
+<template id="v-we">
+  <div class="m rise">
+    <div class="we-tabs"><span>Découvrir</span><span class="on">Installés</span><span>Workshop</span></div>
+    <div class="we-grid">
+      <div class="tile"><div class="ph"></div><small>Autre fond d'écran</small></div>
+      <div class="tile sel"><div class="ph img" data-img="s1"></div><small>Minecraft Abyss — Chute dans l'océan</small></div>
+      <div class="tile"><div class="ph"></div><small>Autre fond d'écran</small></div>
+    </div>
+    <div class="note">Absent ? « Ouvrir un fond d'écran », puis <span class="mono">project.json</span>.</div>
+  </div>
+</template>
+
+<template id="v-props">
+  <div class="m rise props">
+    <div class="row"><label>Skin Minecraft (fichier PNG)</label><div class="ctl hl"><span class="mono">mon-skin.png</span><b>Choisir…</b></div></div>
+    <div class="or">ou / or</div>
+    <div class="row"><label>Pseudo Minecraft Java (internet requis)</label><div class="ctl"><span class="mono type">Notch</span></div></div>
+    <div class="row"><label>Bras</label><div class="ctl"><span>Automatique</span><b>▾</b></div></div>
+  </div>
+</template>
+
+<template id="v-tune">
+  <div class="m rise">
+    <div class="sl"><div class="lab"><span>Vitesse de chute</span><b>0,35</b></div><div class="track"><i style="--v:17%"></i></div></div>
+    <div class="sl"><div class="lab"><span>Volume du son</span><b>50</b></div><div class="track"><i style="--v:50%"></i></div></div>
+    <div class="lab" style="font-size:.88em;color:var(--muted);margin-bottom:.5em">Palette de l'océan</div>
+    <div class="chips"><i style="background:#0b6fb0"></i><i style="background:#17b8c2"></i><i style="background:#168a5c"></i><i style="background:#7a3fb5"></i></div>
+    <div class="lab" style="font-size:.88em;color:var(--muted);margin-bottom:.5em">Qualité</div>
+    <div class="seg3"><span>Basse</span><span>Moyenne</span><span class="on">Haute</span></div>
+  </div>
+</template>
+
+<template id="v-game">
+  <div class="m rise game">
+    <div class="mon"><b>JEU / GAME<br>FULLSCREEN</b></div>
+    <svg class="arrow" viewBox="0 0 24 24"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg>
+    <div class="wp">
+      <svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+      <b>Pause</b>
+      <svg class="off" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9zm13.6 3l2.2-2.2-1.4-1.4L15.2 10.6 13 8.4l-1.4 1.4 2.2 2.2-2.2 2.2 1.4 1.4 2.2-2.2 2.2 2.2 1.4-1.4z"/></svg>
+      <small>Son coupé / Sound off</small>
+    </div>
+  </div>
+</template>
+
+<template id="v-bat">
+  <div class="m rise bat">
+    <div class="file sel"><svg viewBox="0 0 24 24" fill="#9fd8ff"><path d="M6 2h8l5 5v14a1 1 0 01-1 1H6a1 1 0 01-1-1V3a1 1 0 011-1zm7 1.5V8h4.5zM12 11.5a3 3 0 100 6 3 3 0 000-6z"/></svg><span class="mono">Lancer.bat</span></div>
+    <svg class="arrow" viewBox="0 0 24 24" style="width:2em"><path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4z"/></svg>
+    <div class="win"><div class="bar"></div><div class="ph" data-img="s2"></div><small>Plein écran · Edge / Chrome</small></div>
+  </div>
+</template>
+
+<script>
+const IMG = { s1: "__S1__", s2: "__S2__", s3: "__S3__", s4: "__S4__" };
+
+const SCENES = [
+  { tag: 'INTRO', dur: 8000, bg: 's1',
+    fr: ['Minecraft Abyss', 'Ton skin Minecraft coule de la surface ensoleillée jusqu’à la fosse des Mariannes, à 10 935 mètres.'],
+    en: 'Your Minecraft skin sinks from the sunlit surface down to the Mariana Trench, 10,935 metres deep.' },
+  { tag: 'APERÇU · PREVIEW', dur: 11000, bg: ['s2', 's3', 's4'], pills: ['200 – 1 000 m · Crépuscule', '1 000 m et plus · Minuit', '6 000 m et plus · Zone hadale'],
+    fr: ['Ce que tu vas voir', 'En descendant : poissons, requins, méduses lumineuses, puis le noir total. Avec une ambiance sonore relaxante.'],
+    en: 'On the way down: fish, sharks, glowing jellyfish, then total darkness. Relaxing ambient sound included.' },
+  { tag: 'ÉTAPE 1 · STEP 1', dur: 10000, bg: 's2', blur: true, vis: 'gh',
+    fr: ['Télécharge le projet', 'Sur GitHub, clique sur « Code », puis sur « Download ZIP ».'],
+    en: 'Download the project. On GitHub, click “Code”, then “Download ZIP”.' },
+  { tag: 'ÉTAPE 2 · STEP 2', dur: 10000, bg: 's2', blur: true, vis: 'path',
+    fr: ['Copie le dossier', 'Dézippe l’archive, puis copie le dossier MinecraftAbyss dans projects › myprojects de Wallpaper Engine.'],
+    en: 'Copy the folder. Unzip the archive, then copy the MinecraftAbyss folder into Wallpaper Engine’s projects › myprojects folder.' },
+  { tag: 'ÉTAPE 3 · STEP 3', dur: 10000, bg: 's2', blur: true, vis: 'we',
+    fr: ['Ouvre-le dans Wallpaper Engine', 'Dans l’onglet « Installés », sélectionne Minecraft Abyss. S’il n’apparaît pas, ouvre project.json avec « Ouvrir un fond d’écran ».'],
+    en: 'Open it in Wallpaper Engine. In the “Installed” tab, select Minecraft Abyss. If it is missing, open project.json with “Open wallpaper”.' },
+  { tag: 'ÉTAPE 4 · STEP 4', dur: 10000, bg: 's3', blur: true, vis: 'props',
+    fr: ['Mets ton skin', 'Choisis ton fichier PNG, ou tape ton pseudo Minecraft Java (internet requis).'],
+    en: 'Add your skin. Pick your PNG file, or type your Minecraft Java username (internet required).' },
+  { tag: 'ÉTAPE 5 · STEP 5', dur: 11000, bg: 's3', blur: true, vis: 'tune',
+    fr: ['Règle l’ambiance', 'Vitesse de chute, volume du son, pose du personnage, palette de couleurs et qualité : tout se règle dans les propriétés.'],
+    en: 'Tune the mood. Fall speed, sound volume, character pose, colour palette and quality: it is all in the properties panel.' },
+  { tag: 'ÉTAPE 6 · STEP 6', dur: 12000, bg: 's4', blur: true, vis: 'game',
+    fr: ['Tu joues ? Le son se coupe', 'En plein écran, le fond d’écran se met en pause et le son s’arrête. Vérifie que les applications en plein écran sont réglées sur « Pause » dans Wallpaper Engine.'],
+    en: 'Gaming? The sound cuts out. In fullscreen the wallpaper pauses and the sound stops. Check that fullscreen applications are set to “Pause” in Wallpaper Engine.' },
+  { tag: 'SANS WALLPAPER ENGINE', dur: 10000, bg: 's2', blur: true, vis: 'bat',
+    fr: ['Sans Wallpaper Engine', 'Double-clique sur Lancer.bat pour l’ouvrir en plein écran dans Edge ou Chrome. Clique une fois sur la page pour activer le son.'],
+    en: 'No Wallpaper Engine? Double-click Lancer.bat to open it fullscreen in Edge or Chrome. Click once on the page to enable the sound.' },
+  { tag: 'FIN · THE END', dur: 8000, bg: 's3',
+    fr: ['Bonne chute !', 'Retrouve le projet et ses mises à jour sur GitHub.'],
+    en: 'Enjoy the dive! Find the project and its updates on GitHub.' }
+];
+
+const $ = (id) => document.getElementById(id);
+const TOTAL = SCENES.reduce((s, x) => s + x.dur, 0);
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MAXD = 10935;
+let cur = -1, t = 0, playing = !reduce, last = 0, front = 'bgA', curKey = '', started = 0;
+
+function mmss(ms) { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+
+function setBg(key, blur) {
+  const sig = key + (blur ? '!' : '');
+  if (sig === curKey) return;
+  curKey = sig;
+  const next = front === 'bgA' ? 'bgB' : 'bgA';
+  const n = $(next), f = $(front);
+  n.style.backgroundImage = 'url(' + IMG[key] + ')';
+  n.classList.toggle('blur', !!blur);
+  n.classList.add('on'); f.classList.remove('on');
+  front = next;
+}
+
+function buildAll() {
+  const ol = $('all');
+  SCENES.forEach((s, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="tag"></span><h3></h3><p></p><p lang="en"></p>';
+    li.children[0].textContent = s.tag; li.children[1].textContent = s.fr[0]; li.children[2].textContent = s.fr[1]; li.children[3].textContent = s.en;
+    ol.appendChild(li);
+  });
+  const seek = $('seek');
+  SCENES.forEach((s, i) => {
+    const b = document.createElement('button'); b.className = 'seg'; b.style.setProperty('--w', s.dur / 1000);
+    b.setAttribute('aria-label', s.tag + ' : ' + s.fr[0]); b.innerHTML = '<i></i>';
+    b.addEventListener('click', () => { show(i); });
+    seek.appendChild(b);
+  });
+}
+
+function show(n) {
+  cur = Math.max(0, Math.min(SCENES.length - 1, n)); t = 0;
+  const s = SCENES[cur];
+  $('stepTag').textContent = s.tag;
+  $('frH').textContent = s.fr[0]; $('frP').textContent = s.fr[1]; $('enT').textContent = s.en;
+  ['fr', 'en'].forEach((id) => { const el = $(id); el.classList.remove('scene-in'); void el.offsetWidth; el.classList.add('scene-in'); });
+  const v = $('visual'); v.innerHTML = '';
+  if (s.vis) {
+    v.appendChild($('v-' + s.vis).content.cloneNode(true));
+    v.querySelectorAll('[data-img]').forEach((el) => { el.style.backgroundImage = 'url(' + IMG[el.dataset.img] + ')'; });
+  }
+  const pill = $('pill'); pill.hidden = !s.pills;
+  if (!Array.isArray(s.bg)) setBg(s.bg, s.blur);
+  [...$('seek').children].forEach((b, i) => { b.firstChild.style.width = i < cur ? '100%' : '0%'; });
+  tick(0);
+}
+
+function tick(dt) {
+  t += dt;
+  const s = SCENES[cur], p = Math.min(1, t / s.dur);
+  $('seek').children[cur].firstChild.style.width = (p * 100) + '%';
+  if (Array.isArray(s.bg)) {
+    const k = Math.min(s.bg.length - 1, Math.floor(p * s.bg.length));
+    setBg(s.bg[k], false);
+    $('pill').textContent = s.pills[k];
+  }
+  const before = SCENES.slice(0, cur).reduce((a, x) => a + x.dur, 0), el = before + t, ratio = el / TOTAL;
+  $('depth').textContent = Math.round(Math.pow(ratio, 2.2) * MAXD).toLocaleString('fr-FR') + ' m';
+  $('time').textContent = mmss(el) + ' / ' + mmss(TOTAL);
+  if (t >= s.dur && playing) {
+    if (cur < SCENES.length - 1) show(cur + 1); else { playing = false; syncPlay(); }
+  }
+}
+
+function syncPlay() {
+  $('playIcon').innerHTML = playing ? '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>'
+    : (cur === SCENES.length - 1 && t >= SCENES[cur].dur ? '<path d="M12 5V2L7 6.5 12 11V8a5 5 0 11-5 5H5a7 7 0 107-8z"/>' : '<path d="M6 4l14 8-14 8z"/>');
+}
+function toggle() {
+  if (!playing && cur === SCENES.length - 1 && t >= SCENES[cur].dur) show(0);
+  playing = !playing; syncPlay();
+}
+
+function loop(now) {
+  const dt = Math.min(100, now - last); last = now;
+  if (playing) tick(dt);
+  requestAnimationFrame(loop);
+}
+
+$('play').addEventListener('click', toggle);
+$('prev').addEventListener('click', () => show(t > 2500 ? cur : cur - 1));
+$('next').addEventListener('click', () => show(cur + 1));
+$('cc').addEventListener('click', () => { const on = $('cc').getAttribute('aria-pressed') !== 'true'; $('cc').setAttribute('aria-pressed', on); $('en').hidden = !on; });
+window.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'BUTTON' && e.key === ' ') return;
+  if (e.key === ' ') { e.preventDefault(); toggle(); }
+  else if (e.key === 'ArrowRight') show(cur + 1);
+  else if (e.key === 'ArrowLeft') show(cur - 1);
+  else if (e.key === 'c' || e.key === 'C') $('cc').click();
+});
+
+buildAll(); show(0); syncPlay();
+requestAnimationFrame((n) => { last = n; loop(n); });
+</script>

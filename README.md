@@ -16,6 +16,11 @@ et n'importe quel navigateur.
 - Compteur de profondeur, pression (atm) et température en direct
 - Ambiance sonore relaxante 100 % synthétisée (aucun bruit blanc, aucun fichier audio) : houle tonale, nappe douce, bulles, notes cristallines, chants de baleine
 
+## Tuto visuel / Visual tutorial
+Un tuto animé en français avec sous-titres anglais (≈ 1 min 40) : télécharge le dépôt et ouvre
+[`tuto/index.html`](tuto/index.html) dans ton navigateur.
+*An animated tutorial in French with English subtitles (≈ 1 min 40): download the repo and open `tuto/index.html` in your browser.*
+
 ## Installation
 ### Wallpaper Engine
 1. Copie le dossier dans `…\steamapps\common\wallpaper_engine\projects\myprojects\`

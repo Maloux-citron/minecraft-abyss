@@ -5,3 +5,6 @@ assets/banner.png
 *.mp4
 Thumbs.db
 .DS_Store
+
+# fichier généré par tuto/build.js (version pour publication Artifact)
+tuto/tuto-artifact.html
