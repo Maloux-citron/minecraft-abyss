@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/banner.jpg" alt="Minecraft Abyss : un skin Minecraft qui coule dans l'océan" width="100%"></p>
+
 # Minecraft Abyss
 
 Fond d'écran animé en 3D temps réel (WebGL / Three.js) : ton skin Minecraft coule lentement de la surface

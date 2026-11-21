@@ -1,5 +1,7 @@
 # skin perso : ne pas publier
 mon-skin.png
+# version pleine résolution de la bannière (3,4 Mo) : on publie le JPEG compressé
+assets/banner.png
 *.mp4
 Thumbs.db
 .DS_Store
